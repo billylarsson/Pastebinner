@@ -1,3 +1,5 @@
+import os
+
 from PyQt6               import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets     import QApplication
 from tricks.buttons      import ExpireBTN, GPGBar, LoadBTN, NewBTN, PrivacyBTN
@@ -10,9 +12,10 @@ from tricks.smartpos     import pos
 from tricks.styles       import style
 from tricks.threadpool   import CustomThreadPool, ThreadThenMain
 from tricks.widgets      import Base, PasteHeader
-import sys, time
+import sys, time, os
 
-user_flags: str = f"\nPERMANENTLY STORE CREDENTIALS (think before doing this):\npython {__file__}"
+save_flag: str = '--save'
+user_flags: str = f"\n{save_flag} permanently stores credentials, not recommended!\npython {__file__}"
 for easy in EASY_REAL:
     if 'key' in easy:
         user_flags += f' --{easy}=your_apikey'
@@ -26,10 +29,15 @@ for easy in EASY_REAL:
         if flag.startswith(var):
             useradds: str = flag[len(var):]
             save_key: str = EASY_REAL[easy]
-            db.save(save_key, useradds)
+            for user_args in sys.argv[1:]:
+                if user_args.lower().startswith(save_flag):
+                    db.save(save_key, useradds)
+                    break
+            else:
+                os.environ[save_key]: str = useradds
 
 
-print(user_flags, '\n')
+print(user_flags, f'(optional: {save_flag})', '\n')
 
 
 class Main(QtWidgets.QMainWindow):

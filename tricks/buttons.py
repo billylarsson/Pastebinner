@@ -140,7 +140,7 @@ class LoadBTN(Button):
 
         false_or_new_settings: [dict | False] = self.master.searchbar_credentials()
         if false_or_new_settings:
-            from pastebin_api import EASY_REAL
+            from tricks.pastebin_api import EASY_REAL
             new_settings: dict = false_or_new_settings
             for easy_key, new_setting in new_settings.items():
                 real_key: str = EASY_REAL[easy_key]

@@ -22,7 +22,7 @@ class GrabImages:
             return self.less_cool_images[priv_var]
         except KeyError:
 
-            from widgets import add, sub
+            from tricks.widgets import add, sub
             im: Image.Image = Image.new('RGB', (100, 60), (0, 0, 0, 0))
             draw: ImageDraw = ImageDraw(im)
 
@@ -56,6 +56,7 @@ class GrabImages:
                 for xy, rgba in line_work:
                     draw.line(xy, rgba)
 
+            db.save_image(var=priv_var, im=im)
             self.less_cool_images[priv_var] = im
             return self.less_cool_images[priv_var]
 
@@ -78,14 +79,15 @@ class GrabImages:
         data: list = db.cursor.execute(q, v).fetchall()
         for paste in [x for x in data]:
             if not paste[Pastes.data]:
-                key: str = data[Pastes.key]
+                key: str = paste[Pastes.key]
                 text: str = download_paste(paste_key=key)
                 if text:
-                    data = db.cursor.execute(q, v).fetchall()
-                    update_q: str = 'update pastes set data = (?) where id is (?)'
-                    update_v: tuple[int] = paste[Pastes.id],
+                    update_q: str = 'update pastes set data = (?) where key is (?)'
+                    update_v: tuple = text, paste[Pastes.key],
                     with db.connection:
                         db.cursor.execute(update_q, update_v)
+
+                    data = db.cursor.execute(q, v).fetchall()
 
         for text in [x[Pastes.data] for x in data if header in (x[Pastes.data] or "")]:
             begin_str: str = '-----BEGIN PGP MESSAGE-----'
