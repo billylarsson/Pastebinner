@@ -2,7 +2,7 @@
 
 
 Pastebin-API tool for reading, posting, deleting, comes with GPG-support.
-Built primary for myself and tailord for my current screen resolution 1440p, assuming it will look messy if you have smaller resolution than that. You can drag and drop images directly onto the colored square to the left to use your own theme for the different privacy settings.
+Built primary for myself and tailored for my current screen resolution 1440p, assuming it will look messy if you have smaller resolution than that. You can drag and drop images directly onto the colored square to the left to use your own theme for the different privacy settings.
 If you really want to use this you'll figure out how this works, else contact me. (only tested with Linux, I have no idea what happens if try this on clown platforms)
 
 
