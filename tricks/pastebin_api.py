@@ -60,8 +60,10 @@ def load_credentials() -> bool:
 
     return True
 
+def reset_cached_user_key():
+    db.save('api_user_key', None)
 
-def get_api_user_key():
+def get_api_user_key() -> [bytes | None]:
     if not load_credentials():
         print(f'error loading pastebin.com credentials')
         return False
@@ -92,27 +94,29 @@ def communicate(params: dict) -> str:
     if cache is not False:
         return cache
 
-    api_user_key = get_api_user_key()
-    if not api_user_key:
-        return ""
+    for _ in range(2):
+        api_user_key: [bytes | None] = get_api_user_key()
+        if not api_user_key:
+            return ""
 
-    api_url: str = CALL_URL['post']
-    params.update(
-        dict(
-            api_dev_key=os.environ[EASY_REAL['key']],
-            api_user_key=api_user_key,
+        api_url: str = CALL_URL['post']
+        api_dev_key: str = os.environ[EASY_REAL['key']]
+        params.update(
+            dict(
+                api_dev_key=api_dev_key,
+                api_user_key=api_user_key,
+            )
         )
-    )
-    pastebin_params = urllib.parse.urlencode(params).encode('utf8')
-    try:
-        response = urllib.request.urlopen(api_url, pastebin_params)
-        if response:
-            data: str = response.read().decode('utf8')
-            saving_cache(params=basic_params, data=data)
-            return data
+        pastebin_params = urllib.parse.urlencode(params).encode('utf8')
+        try:
+            response = urllib.request.urlopen(api_url, pastebin_params)
+            if response:
+                data: str = response.read().decode('utf8')
+                saving_cache(params=basic_params, data=data)
+                return data
 
-    except urllib.error.HTTPError:
-        ...
+        except urllib.error.HTTPError:
+            reset_cached_user_key()
 
     return ""
 

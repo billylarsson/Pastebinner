@@ -13,8 +13,8 @@ from tricks.widgets         import Base, PasteHeader, ShadedTextLabel
 import io, os, time, zipfile
 
 FOLDER_STARTSWITH_BLOCK: set = {'_', 'venv', 'env', '.'}
-FILES_STARTSWITH_BLOCK: set = set()
-FILES_ENDSWITH_BLOCK: set = set()
+FILE_STARTSWITH_BLOCK: set = set()
+FILE_EXTENSION_BLOCK: set = {'.sqlite'}
 
 class Button(Base):
     border_width: int = 4
@@ -162,6 +162,13 @@ class NewBTN(Button):
             self.master.gpg_decrypt_shade.suicide()
 
         self.master.kill_url_label()
+        self.reset_publish_btn()
+
+    def reset_publish_btn(self):
+        try:
+            self.master.shelf.scrollarea.widgets[0].reset_publish_btn()
+        except (AttributeError, IndexError):
+            ...
 
 class PublishBTN(Button):
     btn_text: str = 'PUBLISH'
@@ -214,12 +221,18 @@ class PublishBTN(Button):
             pos(self.expand_label, width=0, height=self.height() - (bw * 2), top=bw, left=bw)
             style(self.expand_label, background='rgba(250,150,150,150)', border='black 2px')
 
+    def all_text_is_path(self) -> bool:
+        text: str = self.master.write_area.qtextedit.toPlainText()
+        rows: list = [row.strip() for row in text.split('\n') if row.strip()]
+        return rows and all(os.path.exists(row) for row in rows)
+
     def inserting_encrypted_directories(self) -> int:
+        if not self.all_text_is_path():
+            return 0
+
         textedit: QtWidgets.QTextEdit = self.master.write_area.qtextedit
         text: str = textedit.toPlainText()
         rows: list = [row.strip() for row in text.split('\n') if row.strip()]
-        if not rows or any(not os.path.exists(row) for row in rows):
-            return 0
 
         dirs: dict = {x.rstrip(os.sep): {} for x in rows if os.path.isdir(x)}
         files: set = {x for x in rows if os.path.isfile(x)}
@@ -327,8 +340,8 @@ class PublishBTN(Button):
     def block_foldername(self, string: str) -> bool:
         return any(string.startswith(x) for x in FOLDER_STARTSWITH_BLOCK)
 
-    def block_filename(self, string: str) -> bool:
-        return any(string.startswith(x) for x in FILES_STARTSWITH_BLOCK)
+    def block_filename(self, f: str) -> bool:
+        return any(f.startswith(x) for x in FILE_STARTSWITH_BLOCK) or any(f.endswith(x) for x in FILE_EXTENSION_BLOCK)
 
     def mouseReleaseEvent(self, ev):
         treated_text: int = 0
@@ -349,6 +362,18 @@ class PublishBTN(Button):
             treated_text = self.inserting_encrypted_directories()
             if treated_text == -1:
                 return
+
+        elif self.all_text_is_path():
+            reminder_text: str = 'AGAIN!!'
+            if self.text_label.text() != reminder_text:
+                self.text_label.set_proper_text(reminder_text)
+                return
+            else:
+                treated_text = self.inserting_encrypted_directories()
+                if treated_text == -1:
+                    return
+
+        self.text_label.set_proper_text(self.btn_text)
 
         title: str = self.master.rgt_titlebar.searchbar.text() or "untitled"
         text: str = self.master.write_area.qtextedit.toPlainText()

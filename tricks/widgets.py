@@ -785,8 +785,17 @@ class PasteHeader(Base):
         elif 'gpg_decrypt_shade' in dir(self.main):
             self.main.gpg_decrypt_shade.suicide()
 
+        self.reset_publish_btn()
+        self.show_url_label()
+
+
+    def show_url_label(self):
+        paste_key: str = self.paste[Pastes.key]
         url: str = f'http://pastebin.com/raw/{paste_key}'
         self.main.show_url_label(url)
+    def reset_publish_btn(self):
+        default_text: str = self.main.publish_btn.btn_text
+        self.main.publish_btn.text_label.set_proper_text(default_text)
 
 
     class GPGBtn(TextLabel):

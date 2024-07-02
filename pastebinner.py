@@ -1,5 +1,3 @@
-import os
-
 from PyQt6               import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets     import QApplication
 from tricks.buttons      import ExpireBTN, GPGBar, LoadBTN, NewBTN, PrivacyBTN
@@ -13,6 +11,7 @@ from tricks.styles       import style
 from tricks.threadpool   import CustomThreadPool, ThreadThenMain
 from tricks.widgets      import Base, PasteHeader
 import sys, time, os
+
 
 save_flag: str = '--save'
 user_flags: str = f"\n{save_flag} permanently stores credentials, not recommended!\npython {__file__}"
@@ -318,8 +317,8 @@ class Main(QtWidgets.QMainWindow):
     def kill_url_label(self):
         if 'url_label' in dir(self):
             try:
-                del self.url_label
                 self.url_label.close()
+                del self.url_label
             except (AttributeError, RuntimeError):
                 ...
 
