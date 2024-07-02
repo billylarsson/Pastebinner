@@ -4,3 +4,7 @@
 Pastebin-API tool for reading, posting, deleting, comes with GPG-support.
 If you really want to use this you'll figure out how this works, else contact me.
 
+
+install packages from terminal: pip install pyqt6 pillow gnupg
+
+start from terminal: python pastebinner.py --key=your_apikey --username=your_username --password=your_password
